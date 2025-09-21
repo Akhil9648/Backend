@@ -102,7 +102,7 @@ const loginUser= asyncHandler (async (req,res)=>{
     // send cookies and responce
     // Agr email nhi mila database me to signup ke liye bol do
     const {email,username,password}=req.body
-    if(!username || !email){
+    if(!(username || email)){
         throw new ApiError(400,"Username or email is required")
     }
     const user=await User.findOne({
