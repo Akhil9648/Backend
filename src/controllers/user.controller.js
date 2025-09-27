@@ -4,6 +4,7 @@ import { ApiResponce } from "../utils/ApiResponce.js";
 import {uploadonCloudinary} from "../utils/cloudinary.js"
 import { User } from "../models/user.models.js"; 
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 const generateAccessAndRefereshTokens = async(userId) =>{
     try {
         const user = await User.findById(userId)
@@ -339,6 +340,38 @@ const changeCurrentUserPassword=asyncHandler(async(req,res)=>{
         .json(
             new ApiResponce(200,channel[0],"User Channel Fetched Successfully")
         )
+    })
+    const getWatchHistory=asyncHandler(async(req,res)=>{
+        const user=await User.aggregate([
+        {
+            $match:{
+                _id:new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        $lookup:{
+            from:"videos",
+            localField:"watchHistory",
+            foreignField:_id,
+            as:"watchHistory",
+            pipeline:[
+                {
+                    $lookup:{
+                        from:"User",
+                        localField:"owner",
+                        foreignField="_id",
+                        as:"owner",
+                        pipeline:[
+                            {
+                                $project:{
+                                    
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+            ])
     })
 export {registerUser,
     loginUser,logoutUser,
