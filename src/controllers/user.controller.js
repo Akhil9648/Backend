@@ -348,30 +348,48 @@ const changeCurrentUserPassword=asyncHandler(async(req,res)=>{
                 _id:new mongoose.Types.ObjectId(req.user._id)
             }
         },
+        {
         $lookup:{
             from:"videos",
             localField:"watchHistory",
-            foreignField:_id,
+            foreignField:"_id",
             as:"watchHistory",
             pipeline:[
                 {
                     $lookup:{
-                        from:"User",
+                        from:"users",
                         localField:"owner",
-                        foreignField="_id",
+                        foreignField:"_id",
                         as:"owner",
                         pipeline:[
                             {
                                 $project:{
-                                    
+                                    fullName:1,
+                                    username:1,
+                                    avatar:1
                                 }
                             }
                         ]
                     }
+                },
+                {
+                    $addFields:{
+                        owner:{
+                            $first:"$owner"
+                        }
+                    }
                 }
             ]
         }
-            ])
+    }
+    ])
+    return res
+    .status(200)
+    .json(new ApiResponce(
+        200,
+        user[0].watchHistory,
+        "Watch History Fetched Successfully"
+    ))
     })
 export {registerUser,
     loginUser,logoutUser,
@@ -380,5 +398,6 @@ export {registerUser,
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getWatchHistory
 }
